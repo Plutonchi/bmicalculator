@@ -1,5 +1,16 @@
 import 'package:calculator/screen/result.dart';
 import 'package:flutter/material.dart';
+import '../components/bottombotton.dart';
+import '../components/icon_content.dart';
+import '../components/reusablecard.dart';
+import '../components/round_icon_button.dart';
+import '../contanst.dart';
+import '../utils/calculate_bmi.dart';
+
+enum Gender {
+  male,
+  female,
+}
 
 class MyPage extends StatefulWidget {
   const MyPage({Key? key}) : super(key: key);
@@ -9,65 +20,17 @@ class MyPage extends StatefulWidget {
 }
 
 class _MyPageState extends State<MyPage> {
-  String? result;
-
-  TextEditingController heightController = TextEditingController();
-  TextEditingController weightController = TextEditingController();
-
-  int height = 160;
-  int counter = 12;
-  int couner = 40;
-
-  void ayruu() {
-    setState(() {
-      if (couner == 40) {
-        return;
-      } else {
-        couner--;
-      }
-    });
-  }
-
-  void koshuu() {
-    setState(() {
-      if (couner == 150) {
-        return;
-      } else {
-        couner++;
-      }
-    });
-  }
-
-  void katta() {
-    setState(() {
-      if (counter == 99) {
-        return;
-      } else {
-        counter++;
-      }
-    });
-  }
-
-  void kichik() {
-    setState(() {
-      if (counter == 12) {
-        return;
-      } else {
-        counter--;
-      }
-    });
-  }
-
-  Color colors = Color.fromARGB(255, 4, 0, 24);
-  Color colrs = Color.fromARGB(255, 37, 34, 56);
-  int currentindex = 0;
+  Gender? selectedGender;
+  int height = 170;
+  int weight = 60;
+  int age = 20;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: colors,
+      backgroundColor: Color.fromARGB(255, 4, 0, 24),
       appBar: AppBar(
-        backgroundColor: colors,
+        backgroundColor: Color.fromARGB(255, 4, 0, 24),
         elevation: 0,
         title: Text(
           "BMI CALCULATOR",
@@ -78,70 +41,89 @@ class _MyPageState extends State<MyPage> {
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(12.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+      body: Padding(
+        padding: EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: Row(
                 children: [
-                  radioButton("Male", Colors.blue, 0),
-                  radioButton("Female", Colors.pink, 1),
+                  Expanded(
+                    child: ReusableCard(
+                      onPress: () {
+                        setState(() {
+                          selectedGender = Gender.male;
+                        });
+                      },
+                      colour: selectedGender == Gender.male
+                          ? kActiveCardColour
+                          : kInactiveCardColour,
+                      cardChild: IconContent(
+                        icon: Icons.male,
+                        label: 'MALE',
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: ReusableCard(
+                      onPress: () {
+                        setState(() {
+                          selectedGender = Gender.female;
+                        });
+                      },
+                      colour: selectedGender == Gender.female
+                          ? kInactiveCardColours
+                          : kInactiveCardColour,
+                      cardChild: IconContent(
+                        icon: Icons.female,
+                        label: 'FEMALE',
+                      ),
+                    ),
+                  ),
                 ],
               ),
-              SizedBox(
-                height: 40.0,
-              ),
-              Container(
-                decoration: BoxDecoration(
-                  color: colrs,
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                height: 200,
-                width: MediaQuery.of(context).size.width,
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: 30,
-                    ),
+            ),
+            Expanded(
+              child: ReusableCard(
+                colour: kInactiveCardColou,
+                cardChild: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
                     Text(
-                      "Height",
-                      style: TextStyle(
-                        fontSize: 18.0,
-                        color: Colors.white,
-                      ),
+                      'HEIGHT',
+                      style: kLabelTextStyle,
                     ),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
                       children: [
                         Text(
                           height.toString(),
-                          style: TextStyle(
-                            fontSize: 70,
-                            color: Colors.white,
-                          ),
+                          style: kNumberTextStyle,
                         ),
                         Text(
-                          "cm",
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
+                          'cm',
+                          style: kLabelTextStyle,
+                        )
                       ],
                     ),
                     SliderTheme(
-                      data: SliderThemeData(
-                        trackHeight: 3.0,
+                      data: SliderTheme.of(context).copyWith(
+                        inactiveTrackColor: Color(0xFF8D8E98),
                         activeTrackColor: Colors.white,
-                        inactiveTrackColor: Color.fromARGB(122, 0, 0, 0),
-                        thumbColor: Colors.pink,
+                        thumbColor: Color(0xFFEB1555),
+                        overlayColor: Color(0x29EB1555),
+                        thumbShape:
+                            RoundSliderThumbShape(enabledThumbRadius: 10.0),
+                        overlayShape:
+                            RoundSliderOverlayShape(overlayRadius: 20.0),
                       ),
                       child: Slider(
-                        min: 120,
-                        max: 220,
                         value: height.toDouble(),
+                        min: 120.0,
+                        max: 220.0,
                         onChanged: (double newValue) {
                           setState(() {
                             height = newValue.round();
@@ -152,256 +134,115 @@ class _MyPageState extends State<MyPage> {
                   ],
                 ),
               ),
-              SizedBox(
-                height: 30,
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+            ),
+            Expanded(
+              child: Row(
                 children: [
-                  Container(
-                    decoration: BoxDecoration(
-                      color: colrs,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    height: 200,
-                    width: 180,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Weight",
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 25,
+                  Expanded(
+                    child: ReusableCard(
+                      colour: kInactiveCardColou,
+                      cardChild: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'WEIGHT',
+                            style: kLabelTextStyle,
                           ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          "$couner",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 50,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Colors.grey[700],
-                                borderRadius: BorderRadius.circular(50),
+                          Text(
+                            weight.toString(),
+                            style: kNumberTextStyle,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              RoundIconButton(
+                                  icon: Icons.remove,
+                                  onPressed: () {
+                                    setState(() {
+                                      weight--;
+                                    });
+                                  }),
+                              SizedBox(
+                                width: 10.0,
                               ),
-                              child: IconButton(
+                              RoundIconButton(
+                                icon: Icons.add,
                                 onPressed: () {
-                                  ayruu();
+                                  setState(() {
+                                    weight++;
+                                  });
                                 },
-                                icon: Icon(
-                                  Icons.remove,
-                                  color: Colors.white,
-                                ),
                               ),
-                            ),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Colors.grey[700],
-                                borderRadius: BorderRadius.circular(50),
-                              ),
-                              child: IconButton(
-                                onPressed: () {
-                                  koshuu();
-                                },
-                                icon: Icon(
-                                  Icons.add,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  SizedBox(
-                    width: 10,
-                  ),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: colrs,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    height: 200,
-                    width: 180,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Age",
-                          style: TextStyle(
-                            color: Colors.grey[600],
-                            fontSize: 25,
+                  Expanded(
+                    child: ReusableCard(
+                      colour: kInactiveCardColou,
+                      cardChild: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'AGE',
+                            style: kLabelTextStyle,
                           ),
-                        ),
-                        SizedBox(
-                          height: 5,
-                        ),
-                        Text(
-                          "$counter",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 50,
-                              fontWeight: FontWeight.bold),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Colors.grey[700],
-                                borderRadius: BorderRadius.circular(50),
-                              ),
-                              child: IconButton(
+                          Text(
+                            age.toString(),
+                            style: kNumberTextStyle,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              RoundIconButton(
+                                icon: Icons.remove,
                                 onPressed: () {
-                                  kichik();
+                                  setState(
+                                    () {
+                                      age--;
+                                    },
+                                  );
                                 },
-                                icon: Icon(
-                                  Icons.remove,
-                                  color: Colors.white,
-                                ),
                               ),
-                            ),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            Container(
-                              decoration: BoxDecoration(
-                                color: Colors.grey[700],
-                                borderRadius: BorderRadius.circular(50),
+                              SizedBox(
+                                width: 10.0,
                               ),
-                              child: IconButton(
-                                onPressed: () {
-                                  katta();
-                                },
-                                icon: Icon(
-                                  Icons.add,
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                              RoundIconButton(
+                                  icon: Icons.add,
+                                  onPressed: () {
+                                    setState(() {
+                                      age++;
+                                    });
+                                  })
+                            ],
+                          )
+                        ],
+                      ),
                     ),
                   ),
                 ],
               ),
-              SizedBox(
-                height: 20,
-              ),
-              Container(
-                height: 60,
-                width: double.infinity,
-                child: TextButton(
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.pink,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.only(
-                          bottomLeft: Radius.circular(10)
-                          bottomRight: Radius.circular(10)),
+            ),
+            BottomButton(
+              buttonTitle: 'CALCULATE',
+              onTap: () {
+                BmiLogic calc = BmiLogic(height: height, weight: weight);
+
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ResultsPage(
+                      bmiResult: calc.calculateBMI(),
+                      resultText: calc.getResult(),
+                      interpretation: calc.getInterpretation(),
                     ),
                   ),
-                  onPressed: () {
-                    double height = double.parse(heightController.value.text);
-                    double weight = double.parse(weightController.value.text);
-                    
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            rusultat(results: calculateBmi(height, weight),),
-                      ),
-                    );
-                  },
-                  child: Text(
-                    "CALCULATE",
-                    style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 25,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.5),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  calculateBmi(double height, double weight) {
-    double finalresult = weight / (height * height / 10000);
-
-    String bmi = finalresult.toStringAsFixed(2);
-    setState(
-      () {
-        result = bmi;
-      },
-    );
-  }
-
-  void changeIndex(int index) {
-    setState(
-      () {
-        currentindex = index;
-      },
-    );
-  }
-
-  Widget radioButton(
-    String value,
-    Color color,
-    int index,
-  ) {
-    return Expanded(
-      child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 12.0),
-        height: 180.0,
-        child: TextButton(
-          style: TextButton.styleFrom(
-            backgroundColor: currentindex == index ? color : colrs,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8.0),
+                );
+              },
             ),
-          ),
-          onPressed: () {
-            changeIndex(index);
-          },
-          child: Column(
-            children: [
-              SizedBox(height: 5),
-              Icon(
-                Icons.male,
-                color: Colors.white,
-                size: 100,
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              Text(
-                value,
-                style: TextStyle(
-                  color: currentindex == index ? Colors.white : Colors.white,
-                  fontSize: 30.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
-          ),
+          ],
         ),
       ),
     );
